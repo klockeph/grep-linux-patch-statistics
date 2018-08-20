@@ -104,7 +104,7 @@ def get_commits_lts(version):
     return get_commits_ordered(versions)
 
 
-lts_versions = ["v3.2", "v3.16", "3.18", "v4.4", "v4.9", "v4.14", "v4.17"]
+lts_versions = ["v3.2", "v3.16", "v3.18", "v4.4", "v4.9", "v4.14", "v4.17"]
 
 write_to_file("syzkaller_zero.csv", get_commits_dot_zero())
 for v in lts_versions:
