@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import csv
 import functools
 import re
@@ -27,23 +28,23 @@ def get_timestamp(version):
     return int(timestamp)
 
 
-def get_commits_single(version):
-    commits = check_output(["git", "log", version, "--grep", "syzkaller.appspotmail.com", "--oneline"], stderr=STDOUT).decode('utf-8').split('\n')[:-1]
+def get_commits_single(version, grep_filter):
+    commits = check_output(["git", "log", version, "--grep", grep_filter, "--oneline", "--no-merges"], stderr=STDOUT).decode('utf-8').split('\n')[:-1]
     return get_timestamp(version), len(commits)
 
 
-def get_commits_diff(version, previous):
-    commits = check_output(["git", "log", previous+".."+version, "--grep", "syzkaller.appspotmail.com", "--oneline"], stderr=STDOUT).decode('utf-8').split('\n')[:-1]
+def get_commits_diff(version, previous, grep_filter):
+    commits = check_output(["git", "log", previous+".."+version, "--grep", grep_filter, "--oneline"], stderr=STDOUT).decode('utf-8').split('\n')[:-1]
     return get_timestamp(version), len(commits)
 
 
-def get_commits_ordered(versions):
+def get_commits_ordered(versions, grep_filter):
     """Note that this method only works if versions are ordered and build on each other"""
     numbers = {}
-    prev = versions[0], get_commits_single(versions[0])
+    prev = versions[0], get_commits_single(versions[0], grep_filter)
     numbers[versions[0]] = prev[1]
     for v in versions[1:]:
-        date, n = get_commits_diff(v, prev[0])
+        date, n = get_commits_diff(v, prev[0], grep_filter)
         prev = v, (date, n + prev[1][1])
         numbers[v] = prev[1]
 
@@ -90,24 +91,34 @@ def write_to_file(filename, numbers):
             writer.writerow([key, value[0], value[1]])
 
 
-def get_commits_dot_zero():
+def get_commits_dot_zero(grep_filter):
     return get_commits_ordered(sorted(
                 get_dot_zero_versions(),
-                key=functools.cmp_to_key(kernel_version_comparator)))
+                key=functools.cmp_to_key(kernel_version_comparator)),
+            grep_filter)
 
 
-def get_commits_lts(version):
+def get_commits_lts(version, grep_filter):
     versions = sorted(
             [v for v in get_versions() if v.startswith(version)],
             key=functools.cmp_to_key(kernel_version_comparator))
 
-    return get_commits_ordered(versions)
+    return get_commits_ordered(versions, grep_filter)
 
 
-lts_versions = ["v3.2", "v3.16", "v3.18", "v4.4", "v4.9", "v4.14", "v4.17"]
 
-write_to_file("syzkaller_zero.csv", get_commits_dot_zero())
-for v in lts_versions:
-    print(v)
-    write_to_file("syzkaller_" + v + ".csv", get_commits_lts(v))
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--filter", default="syzkaller.appspotmail.com")
+    args = parser.parse_args()
 
+    lts_versions = ["v3.2", "v3.16", "v3.18", "v4.4", "v4.9", "v4.14", "v4.17"]
+
+    write_to_file("syzkaller_zero.csv", get_commits_dot_zero(args.filter))
+    for v in lts_versions:
+        print(v)
+        write_to_file("syzkaller_" + v + ".csv", get_commits_lts(v, args.filter))
+
+
+if __name__ == "__main__":
+    main()
