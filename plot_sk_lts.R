@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Copyright 2018 Philipp Klocke
+# Copyright 2018 Philipp Klocke, BMW AG
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ library(ggrepel)
 library(grid)
 library(plyr)
 
-copyrightNotice <- "Philipp Klocke,\nAugust 2018,\nlicensed under CC-BY-4.0"
+copyrightNotice <- "Philipp Klocke, August 2018, licensed under CC-BY-4.0"
 
 args = commandArgs(trailingOnly=TRUE)
 
