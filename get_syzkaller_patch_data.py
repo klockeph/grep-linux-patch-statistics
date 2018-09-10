@@ -86,7 +86,7 @@ def kernel_version_comparator(v1, v2):
 def write_to_file(filename, numbers):
     with open(filename, 'w+') as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerow(["version", "timestamp", "syzkaller_patches"])
+        writer.writerow(["version", "timestamp", "patches"])
         for key, value in numbers.items():
             writer.writerow([key, value[0], value[1]])
 
@@ -100,7 +100,7 @@ def get_commits_dot_zero(grep_filter):
 
 def get_commits_lts(version, grep_filter):
     versions = sorted(
-            [v for v in get_versions() if v.startswith(version)],
+            [v for v in get_versions() if v == version or v.startswith(version+".")],
             key=functools.cmp_to_key(kernel_version_comparator))
 
     return get_commits_ordered(versions, grep_filter)
@@ -110,14 +110,18 @@ def get_commits_lts(version, grep_filter):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--filter", default="syzkaller.appspotmail.com")
+    parser.add_argument("-p", "--prefix", default="syzkaller")
     args = parser.parse_args()
 
-    lts_versions = ["v3.2", "v3.16", "v3.18", "v4.4", "v4.9", "v4.14", "v4.17"]
+    print("prefix:", args.prefix)
+    print("filter:", args.filter)
+    with open("lts_versions") as f:
+        lts_versions = [v.strip() for v in f.read().split(" ")]
 
-    write_to_file("syzkaller_zero.csv", get_commits_dot_zero(args.filter))
+    write_to_file(args.prefix + "_zero.csv", get_commits_dot_zero(args.filter))
     for v in lts_versions:
         print(v)
-        write_to_file("syzkaller_" + v + ".csv", get_commits_lts(v, args.filter))
+        write_to_file(args.prefix + "_" + v + ".csv", get_commits_lts(v, args.filter))
 
 
 if __name__ == "__main__":

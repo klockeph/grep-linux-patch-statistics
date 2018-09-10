@@ -22,8 +22,8 @@ copyrightNotice <- "Philipp Klocke, August 2018, licensed under CC-BY-4.0"
 
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args) < 1) {
-	stop("Usage: plot_sk_zero.R data1.csv [data2.csv]...", call.=FALSE)
+if (length(args) != 1) {
+	stop("Usage: plot_sk_zero.R data1.csv", call.=FALSE)
 }
 
 # read each data file in order
@@ -33,13 +33,13 @@ df <- mutate(df, timestamp=as.POSIXct(timestamp, origin="1970-01-01"), version=a
 # fix ordering of kernel versions
 df$version <- factor(df$version, levels=unique(df$version))
 
-p <-ggplot(data=df, aes(x=version, y=syzkaller_patches)) +
-	geom_bar(stat="identity", fill="blue") +
+p <-ggplot(data=df, aes(x=version, y=patches)) +
+	geom_point() +
 	xlab("Versions") +
-	ylab("Syzkaller Patches") +
+	ylab("Patches") +
 	theme(axis.text.x=element_text(angle=90, hjust=1)) +                                      # rotate x labels
 	annotation_custom(grobTree(textGrob(copyrightNotice, x=0.01, y=0.95, hjust=0)))           # copyright
 
 
-ggsave("syzkaller_patches_zero.png", plot=p, width=50, height=20, units="cm")
+ggsave("patches_zero.png", plot=p, width=50, height=20, units="cm")
 
