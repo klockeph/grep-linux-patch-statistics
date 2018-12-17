@@ -36,7 +36,7 @@ p <- ggplot() +
 	labs(color="Tool") +
 	ggtitle("Releases") +
 	theme_minimal() +
-	theme(axis.text.x=element_text(angle=90, hjust=1))                              # rotate x labels
+	theme(axis.text.x=element_text(angle=90, hjust=1)) +                            # rotate x labels
 	annotation_custom(grobTree(textGrob(copyrightNotice, x=0.01, y=0.95, hjust=0))) # copyright
 
 for (arg in args) {
