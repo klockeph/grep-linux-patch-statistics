@@ -19,7 +19,7 @@ library(grid)
 library(plyr)
 # library(tikzDevice)
 
-copyrightNotice <- "Philipp Klocke, August 2018, licensed under CC-BY-4.0"
+copyrightNotice <- "Philipp Klocke, BMW AG, December 2018, licensed under CC-BY-4.0"
 
 args = commandArgs(trailingOnly=TRUE)
 
